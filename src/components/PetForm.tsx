@@ -40,7 +40,11 @@ export function PetForm({ pet, onClose }: PetFormProps) {
     e.preventDefault();
     setError('');
     setLoading(true);
+    const { data: { user } } = await supabase.auth.getUser();
 
+    if (!user) {
+      throw new Error("User not authenticated");
+    }
     try {
       if (pet) {
         const { error } = await supabase
@@ -52,7 +56,7 @@ export function PetForm({ pet, onClose }: PetFormProps) {
       } else {
         const { error } = await supabase
           .from('pets')
-          .insert([formData]);
+          .insert([{...formData,owner_id: user.id,}]);
 
         if (error) throw error;
       }
